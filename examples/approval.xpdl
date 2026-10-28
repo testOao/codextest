@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Package xmlns="http://www.wfmc.org/2002/XPDL1.0" Id="approval" Name="Approval example">
+<Participants><Participant Id="requester"/><Participant Id="manager"/></Participants>
+<WorkflowProcesses><WorkflowProcess Id="approve" Name="Approve request"><Activities>
+<Activity Id="submit" Name="Submit request"><Performer>requester</Performer></Activity>
+<Activity Id="review" Name="Review request"><Performer>manager</Performer></Activity>
+</Activities><Transitions><Transition Id="toReview" From="submit" To="review"/></Transitions></WorkflowProcess></WorkflowProcesses>
+</Package>
