@@ -1,10 +1,10 @@
 # Joget / Shark XPDL analyzer
 
-Spring Boot 3.5, Java 21 application for static analysis of Joget workflow XPDL exports. No database or Shark installation is required.
+Spring Boot 3.5, Java 17 or newer application for static analysis of Joget workflow XPDL exports. No database or Shark installation is required.
 
 ## Run
 
-Install Java 21 and Maven 3.9+, then run from this directory:
+Install a full JDK 17 or newer and Maven 3.9+, then run from this directory:
 
 ```sh
 mvn test
@@ -33,8 +33,10 @@ Example input is in `examples/approval.xpdl`.
 Maven is installed at `/workspace/apache-maven-3.9.11`. The workspace JDK lacks `ct.sym`; use source/target compilation instead of `--release` here. The external settings file configures the managed network proxy (no credentials):
 
 ```sh
-/workspace/apache-maven-3.9.11/bin/mvn -s /workspace/maven-settings.xml -Dmaven.compiler.release= -Dmaven.compiler.source=21 -Dmaven.compiler.target=21 package
+/workspace/apache-maven-3.9.11/bin/mvn -s /workspace/maven-settings.xml -Dmaven.compiler.release= -Dmaven.compiler.source=17 -Dmaven.compiler.target=17 package
 java -jar target/joget-shark-analyzer-1.0.0.jar
 ```
 
-A full Java 21 JDK on another machine can use the standard commands above.
+A full Java 17 or newer JDK on another machine can use the standard commands above.
+
+If compilation reports an unsupported release, run `mvn -version` and confirm its Java runtime is a full JDK 17 or newer. Set `JAVA_HOME` to that JDK and restart your terminal or IDE before rebuilding. The Java version used by Maven can differ from `java -version`.
