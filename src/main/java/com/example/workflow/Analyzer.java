@@ -11,14 +11,134 @@ import java.util.*;
 
 @Service
 public class Analyzer {
-    public record Finding(String severity, String code, String elementId, String message) {}
-    public record Activity(String id, String name, String type, String performer, String subprocess) {}
-    public record Transition(String id, String from, String to, String conditionType, String condition) {}
-    public record ProcessReport(String id, String name, List<Activity> activities, List<Transition> transitions,
-                                List<String> participants, List<String> startCandidates, List<String> endCandidates,
-                                List<Finding> findings) {}
-    public record Report(String packageId, String name, String namespace, List<ProcessReport> processes,
-                         List<Finding> findings) {}
+    public static final class Finding {
+        private final String severity;
+        private final String code;
+        private final String elementId;
+        private final String message;
+        public Finding(String severity, String code, String elementId, String message) {
+            this.severity = severity;
+            this.code = code;
+            this.elementId = elementId;
+            this.message = message;
+        }
+        public String severity() { return severity; }
+        public String getSeverity() { return severity; }
+        public String code() { return code; }
+        public String getCode() { return code; }
+        public String elementId() { return elementId; }
+        public String getElementId() { return elementId; }
+        public String message() { return message; }
+        public String getMessage() { return message; }
+    }
+    public static final class Activity {
+        private final String id;
+        private final String name;
+        private final String type;
+        private final String performer;
+        private final String subprocess;
+        public Activity(String id, String name, String type, String performer, String subprocess) {
+            this.id = id;
+            this.name = name;
+            this.type = type;
+            this.performer = performer;
+            this.subprocess = subprocess;
+        }
+        public String id() { return id; }
+        public String getId() { return id; }
+        public String name() { return name; }
+        public String getName() { return name; }
+        public String type() { return type; }
+        public String getType() { return type; }
+        public String performer() { return performer; }
+        public String getPerformer() { return performer; }
+        public String subprocess() { return subprocess; }
+        public String getSubprocess() { return subprocess; }
+    }
+    public static final class Transition {
+        private final String id;
+        private final String from;
+        private final String to;
+        private final String conditionType;
+        private final String condition;
+        public Transition(String id, String from, String to, String conditionType, String condition) {
+            this.id = id;
+            this.from = from;
+            this.to = to;
+            this.conditionType = conditionType;
+            this.condition = condition;
+        }
+        public String id() { return id; }
+        public String getId() { return id; }
+        public String from() { return from; }
+        public String getFrom() { return from; }
+        public String to() { return to; }
+        public String getTo() { return to; }
+        public String conditionType() { return conditionType; }
+        public String getConditionType() { return conditionType; }
+        public String condition() { return condition; }
+        public String getCondition() { return condition; }
+    }
+    public static final class ProcessReport {
+        private final String id;
+        private final String name;
+        private final List<Activity> activities;
+        private final List<Transition> transitions;
+        private final List<String> participants;
+        private final List<String> startCandidates;
+        private final List<String> endCandidates;
+        private final List<Finding> findings;
+        public ProcessReport(String id, String name, List<Activity> activities, List<Transition> transitions, List<String> participants, List<String> startCandidates, List<String> endCandidates, List<Finding> findings) {
+            this.id = id;
+            this.name = name;
+            this.activities = activities;
+            this.transitions = transitions;
+            this.participants = participants;
+            this.startCandidates = startCandidates;
+            this.endCandidates = endCandidates;
+            this.findings = findings;
+        }
+        public String id() { return id; }
+        public String getId() { return id; }
+        public String name() { return name; }
+        public String getName() { return name; }
+        public List<Activity> activities() { return activities; }
+        public List<Activity> getActivities() { return activities; }
+        public List<Transition> transitions() { return transitions; }
+        public List<Transition> getTransitions() { return transitions; }
+        public List<String> participants() { return participants; }
+        public List<String> getParticipants() { return participants; }
+        public List<String> startCandidates() { return startCandidates; }
+        public List<String> getStartCandidates() { return startCandidates; }
+        public List<String> endCandidates() { return endCandidates; }
+        public List<String> getEndCandidates() { return endCandidates; }
+        public List<Finding> findings() { return findings; }
+        public List<Finding> getFindings() { return findings; }
+    }
+    public static final class Report {
+        private final String packageId;
+        private final String name;
+        private final String namespace;
+        private final List<ProcessReport> processes;
+        private final List<Finding> findings;
+        public Report(String packageId, String name, String namespace, List<ProcessReport> processes, List<Finding> findings) {
+            this.packageId = packageId;
+            this.name = name;
+            this.namespace = namespace;
+            this.processes = processes;
+            this.findings = findings;
+        }
+        public String packageId() { return packageId; }
+        public String getPackageId() { return packageId; }
+        public String name() { return name; }
+        public String getName() { return name; }
+        public String namespace() { return namespace; }
+        public String getNamespace() { return namespace; }
+        public List<ProcessReport> processes() { return processes; }
+        public List<ProcessReport> getProcesses() { return processes; }
+        public List<Finding> findings() { return findings; }
+        public List<Finding> getFindings() { return findings; }
+    }
 
     public Report analyze(byte[] xml) {
         if (xml.length == 0 || xml.length > 2_000_000) throw new IllegalArgumentException("XML must contain between 1 byte and 2 MB.");
@@ -82,8 +202,8 @@ public class Analyzer {
             if (!activityIds.contains(from)||!activityIds.contains(to)) findings.add(new Finding("ERROR","BROKEN_TRANSITION",id,"Transition references an unknown source or target activity."));
             else { next.get(from).add(to); incoming.add(to); }
         }
-        var starts=activityIds.stream().filter(id->!incoming.contains(id)).toList();
-        var ends=activityIds.stream().filter(id->next.get(id).isEmpty()).toList();
+        var starts=activityIds.stream().filter(id->!incoming.contains(id)).collect(java.util.stream.Collectors.toList());
+        var ends=activityIds.stream().filter(id->next.get(id).isEmpty()).collect(java.util.stream.Collectors.toList());
         if(elements.isEmpty()) findings.add(new Finding("ERROR","NO_ACTIVITIES",process.getAttribute("Id"),"Process contains no activities."));
         if(!elements.isEmpty() && starts.isEmpty()) findings.add(new Finding("WARNING","NO_START_CANDIDATE",process.getAttribute("Id"),"No activity without incoming transitions. Check explicit start configuration and cycles."));
         if(!elements.isEmpty() && ends.isEmpty()) findings.add(new Finding("WARNING","NO_END_CANDIDATE",process.getAttribute("Id"),"No activity without outgoing transitions. Check termination and cycles."));
@@ -95,7 +215,7 @@ public class Analyzer {
     private static String local(Element e) { return e.getLocalName()==null?e.getTagName():e.getLocalName(); }
     private static List<Element> children(Element parent,String name) {
         var result=new ArrayList<Element>();
-        if(parent!=null) for(Node n=parent.getFirstChild();n!=null;n=n.getNextSibling()) if(n instanceof Element e && local(e).equals(name) && Objects.equals(e.getNamespaceURI(),parent.getNamespaceURI())) result.add(e);
+        if(parent!=null) for(Node n=parent.getFirstChild();n!=null;n=n.getNextSibling()) if(n instanceof Element) { Element e=(Element)n; if(local(e).equals(name) && Objects.equals(e.getNamespaceURI(),parent.getNamespaceURI())) result.add(e); }
         return result;
     }
     private static Element container(Element parent,String name) { return children(parent,name).stream().findFirst().orElse(null); }
